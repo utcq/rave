@@ -129,9 +129,9 @@ fn sth(input: &str) -> Vec<u16> {
 
 struct Read;
 impl Read {
-    fn int(addr: *mut u8, var:&mut i32) {
+    fn int(addr: *mut i32, var:&mut i32) {
         unsafe {
-            *var = *addr as i32;
+            *var = *addr;
         }
     }
 
@@ -168,18 +168,19 @@ impl Read {
 
 
 fn main() {
-    /*let adr = Alloc::i16(2421).expect("Panic");  //allochiamo i16
-    let mut val: i32=0;                                        // creiamo una var per tenere il valore nella heap
-    Read::int(adr, &mut val);                        // leggiamo il valore nella var
-    println!("{:?} => {}   !->   {:?}", adr, val, std::ptr::addr_of!(val));                          // print dell'indirizzo e del valore
-    dealloc(adr);                                         // deallochiamo l'i16
-    delete(std::ptr::addr_of!(val) as *mut i32);               // eliminiamo la variabile
-    */
-    let adr = Alloc::string("Hello").expect("Panic");
+    let adr = Alloc::i16(2421).expect("Panic");
+    let mut val: i32=0;                                     
+    Read::int(adr, &mut val);                       
+    println!("{:?} => {}   !->   {:?}", adr, val, std::ptr::addr_of!(val));                         
+    Dealloc::int(adr);                                         
+    Dealloc::delete(std::ptr::addr_of!(val) as *mut i32);
+    
+
+    /*let adr = Alloc::string("Hello").expect("Panic");
     let mut val:String="".to_string();
     Read::string(adr, &mut val);
     println!("{:?} => {}    !->   {:?}", adr, val, std::ptr::addr_of!(val));
     Dealloc::string(adr);
-    Dealloc::delete(std::ptr::addr_of!(val) as *mut i32);
+    Dealloc::delete(std::ptr::addr_of!(val) as *mut i32);*/
     loop {}
 }
