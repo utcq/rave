@@ -1,5 +1,24 @@
 use base64;
 
+
+fn sth(input: &str) -> Vec<u16> {
+    let bytearr: Vec<u16> = input.encode_utf16().collect();
+
+    let mut result: Vec<u16> = vec![];
+
+    for byte in bytearr {
+        let mut new = byte.to_string();
+        new.push('3');
+        result.push(
+            u16::from_str_radix(&new, 10).expect("Panic")
+        )
+    }
+
+    std::mem::drop(input);
+    return result;
+}
+
+
 // ALLOC
 struct Alloc;
 
@@ -74,6 +93,8 @@ impl Alloc {
     }
 }
 
+
+
 struct Dealloc;
 impl Dealloc {
     fn int(addr: *mut i32){
@@ -100,31 +121,25 @@ impl Dealloc {
             std::alloc::dealloc(addr as *mut u8, layout);
         }
     }
-    fn delete(addr: *mut i32) {
+}
+struct Delete;
+impl Delete {
+    fn int(value: &mut i32) {
         unsafe {
-            *addr = 0x40;
+            let ptr =std::ptr::addr_of!(value) as *mut u8;
+            ptr.write(0x40);
+            *ptr = 0x40;
+            *value = 0x40;
+            std::mem::forget(value);
+        }
+    }
+
+    fn string(value: &mut String) {
+        unsafe {
+            *value = "0x40".to_string();
         }
     }
 }
-
-fn sth(input: &str) -> Vec<u16> {
-    let bytearr: Vec<u16> = input.encode_utf16().collect();
-
-    let mut result: Vec<u16> = vec![];
-
-    for byte in bytearr {
-        let mut new = byte.to_string();
-        new.push('3');
-        result.push(
-            u16::from_str_radix(&new, 10).expect("Panic")
-        )
-    }
-
-    std::mem::drop(input);
-    return result;
-}
-
-
 
 
 struct Read;
@@ -136,7 +151,7 @@ impl Read {
     }
 
     #[allow(deprecated)]
-    fn string(addr: *mut u16, var: &mut String) {
+    fn string(addr: *mut u16) -> Vec<u16> {
         unsafe {
             let mut bytearray: Vec<u16> = vec![];
             let mut result: Vec<u16> = vec![];
@@ -153,14 +168,34 @@ impl Read {
                 result.push(u16::from_str_radix(&bstr, 10).expect("Panic"));
             }
 
+            return StrOut::encode(String::from_utf16(&result).expect("Panic"));
 
-            std::mem::forget(bytearray);
-            let x = &(String::from_utf16(&result).expect("Panic"));
-            let y = base64::decode(x).unwrap();
-            std::mem::drop(x);
-
-            *var = String::from_utf8(y).unwrap();
         }
+    }
+}
+
+struct StrOut;
+impl StrOut {
+    fn encode(plain: String) -> Vec<u16> {
+        let mut encoded_data = Vec::new();
+    
+        for utf16_unit in plain.encode_utf16() {
+            let encoded_unit = utf16_unit.wrapping_add(1);
+            encoded_data.push(encoded_unit);
+        }
+    
+        encoded_data
+    }
+    
+    fn decode(encoded: Vec<u16>) -> String {
+        let mut decoded_data = Vec::new();
+    
+        for utf16_unit in encoded {
+            let decoded_unit = utf16_unit.wrapping_sub(1);
+            decoded_data.push(decoded_unit);
+        }
+    
+        return String::from_utf8(base64::decode(String::from_utf16_lossy(&decoded_data)).unwrap()).unwrap();
     }
 }
 
@@ -168,19 +203,17 @@ impl Read {
 
 
 fn main() {
-    let adr = Alloc::i16(2421).expect("Panic");
+    /*let adr = Alloc::i16(2421).expect("Panic");
     let mut val: i32=0;                                     
     Read::int(adr, &mut val);                       
     println!("{:?} => {}   !->   {:?}", adr, val, std::ptr::addr_of!(val));                         
     Dealloc::int(adr);                                         
-    Dealloc::delete(std::ptr::addr_of!(val) as *mut i32);
-    
+    Delete::int(std::ptr::addr_of!(val) as *mut i32);
+    */
 
-    /*let adr = Alloc::string("Hello").expect("Panic");
-    let mut val:String="".to_string();
-    Read::string(adr, &mut val);
-    println!("{:?} => {}    !->   {:?}", adr, val, std::ptr::addr_of!(val));
+    let adr = Alloc::string("Hello").expect("Panic");
+    Read::string(adr);
+    println!("{:?} => {:?}", adr, Read::string(adr));
     Dealloc::string(adr);
-    Dealloc::delete(std::ptr::addr_of!(val) as *mut i32);*/
     loop {}
 }
