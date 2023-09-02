@@ -63,6 +63,4 @@ fn main(){
 }
 ```
 ## License
-[MIT]("LICENSE")
-
----
+[MIT-licensed repository](LICENSE)
