@@ -28,8 +28,40 @@
 You can still overwrite values with `*adr = 5`.
 
 ## Usage
+### 1. Import as src/main.rs module
+```rs
+mod rave
 
+fn main() {
+}
+```
+### 2. Allocates a &str
+```rs
+mod rave
 
+fn main(){
+  let addr = rave::Alloc::string("my &str");
+}
+```
+### 3. Get the value of the string
+```rs
+mod rave
+
+fn main() {
+  let addr = rave::Alloc::string("my &str");
+  println!("{}", rave::StrOut::decode(rave::Read::string(addr)).as_str());
+}
+```
+### 4. Delete allocated &str
+```rs
+mod rave
+
+fn main(){
+  let addr = rave::Alloc::string("my &str");
+  println!("{}", rave::StrOut::decode(rave::Read::string(addr)).as_str());
+  rave::Dealloc::string(addr);
+}
+```
 ## License
 [MIT]("LICENSE")
 
