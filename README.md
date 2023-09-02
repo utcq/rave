@@ -27,8 +27,10 @@
 
 You can still overwrite values with `*adr = 5`.
 
-## License
+## Usage
 
-MIT
+
+## License
+[MIT]("LICENSE")
 
 ---
