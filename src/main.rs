@@ -198,22 +198,3 @@ impl StrOut {
         return String::from_utf8(base64::decode(String::from_utf16_lossy(&decoded_data)).unwrap()).unwrap();
     }
 }
-
-// =======
-
-
-fn main() {
-    /*let adr = Alloc::i16(2421).expect("Panic");
-    let mut val: i32=0;                                     
-    Read::int(adr, &mut val);                       
-    println!("{:?} => {}   !->   {:?}", adr, val, std::ptr::addr_of!(val));                         
-    Dealloc::int(adr);                                         
-    Delete::int(std::ptr::addr_of!(val) as *mut i32);
-    */
-
-    let adr = Alloc::string("Hello").expect("Panic");
-    Read::string(adr);
-    println!("{:?} => {:?}", adr, Read::string(adr));
-    Dealloc::string(adr);
-    loop {}
-}
